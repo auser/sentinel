@@ -5,8 +5,7 @@ defmodule Sentinel.Controllers.Html.User do
     changeset = Sentinel.UserHelper.model.changeset(struct(Sentinel.UserHelper.model))
 
     conn
-    |> put_status(:ok)
-    |> render(Sentinel.UserView, "new.html", changeset: changeset)
+    |> render(Sentinel.ViewHelper.user_view, "new.html", changeset: changeset)
   end
 
   @doc """
@@ -21,7 +20,7 @@ defmodule Sentinel.Controllers.Html.User do
         conn
         |> put_status(:unprocessable_entity)
         |> put_flash(:error, "Unable to complete the registration")
-        |> render(Sentinel.UserView, :new, changeset: changeset)
+        |> render(Sentinel.ViewHelper.user_view, :new, changeset: changeset)
     end
   end
 
@@ -30,25 +29,21 @@ defmodule Sentinel.Controllers.Html.User do
       {false, false} -> # not confirmable or invitable
         conn
         |> Guardian.Plug.sign_in(user)
-        |> put_status(:created)
         |> put_flash(:info, "Successfully logged in")
         |> redirect(to: "/")
       {_confirmable, :true} -> # must be invited
         conn
         |> Guardian.Plug.sign_in(user)
-        |> put_status(:created)
         |> put_flash(:info, "Successfully invited the user")
         |> redirect(to: Sentinel.RouterHelper.helpers.user_path(conn, :new))
       {:required, _invitable} -> # must be confirmed
         conn
         |> Guardian.Plug.sign_in(user)
-        |> put_status(:created)
         |> put_flash(:info, "Successfully created account. Please confirm your account")
         |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
       {_confirmable_default, _invitable} -> # default behavior, optional confirmable, not invitable
         conn
         |> Guardian.Plug.sign_in(user)
-        |> put_status(:created)
         |> put_flash(:info, "Successfully logged in. Please confirm your account")
         |> redirect(to: "/")
     end
@@ -69,7 +64,7 @@ defmodule Sentinel.Controllers.Html.User do
   def confirmation_instructions(conn, _params) do
     conn
     |> put_status(:ok)
-    |> render(Sentinel.UserView, "confirmation_instructions.html")
+    |> render(Sentinel.ViewHelper.user_view, "confirmation_instructions.html")
   end
 
   def confirm(conn, params) do
@@ -77,11 +72,9 @@ defmodule Sentinel.Controllers.Html.User do
       {:ok, _user} ->
         conn
         |> put_flash(:info, "Successfully confirmed your account")
-        |> put_status(:ok)
         |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
       {:error, _changeset} ->
         conn
-        |> put_status(:unprocessable_entity)
         |> put_flash(:error, "Unable to confirm your account")
         |> redirect(to: Sentinel.RouterHelper.helpers.user_path(conn, :confirmation_instructions))
     end
@@ -92,12 +85,10 @@ defmodule Sentinel.Controllers.Html.User do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(user)
-        |> put_status(:created)
         |> put_flash(:info, "Successfully setup your account")
         |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
       {:error, _changeset} ->
         conn
-        |> put_status(:unprocessable_entity)
         |> put_flash(:error, "Unable to setup your account")
         |> redirect(to: Sentinel.RouterHelper.helpers.user_path(:new))
     end

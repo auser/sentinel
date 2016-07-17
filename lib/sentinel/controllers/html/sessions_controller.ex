@@ -18,17 +18,16 @@ defmodule Sentinel.Controllers.Html.Sessions do
   Log in as an existing user.
   Parameter are "username" and "password".
   """
-  def create(conn, %{"username" => username, "password" => password}) do
+  def create(conn, %{"session" => %{"username" => username, "password" => password}}) do
     case Authenticator.authenticate_by_username(username, password) do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(user)
         |> put_flash(:info, "Successfully logged in")
         |> redirect(to: "/")
-      {:error, _errors} ->
+      {:error, errors} ->
         conn
-        |> put_flash(:error, "Unable to authenticate successfully")
-        |> put_status(:unauthorized)
+        |> put_flash(:error, errors.base)
         |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
     end
   end
@@ -37,17 +36,16 @@ defmodule Sentinel.Controllers.Html.Sessions do
   Log in as an existing user.
   Parameter are "email" and "password".
   """
-  def create(conn, %{"email" => email, "password" => password}) do
+  def create(conn, %{"session" => %{"email" => email, "password" => password}}) do
     case Authenticator.authenticate_by_email(email, password) do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(user)
         |> put_flash(:info, "Successfully logged in")
         |> redirect(to: "/")
-      {:error, _errors} ->
+      {:error, errors} ->
         conn
-        |> put_flash(:error, "Unable to authenticate successfully")
-        |> put_status(:unauthorized)
+        |> put_flash(:error, errors.base)
         |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
     end
   end
