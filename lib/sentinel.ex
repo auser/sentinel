@@ -7,6 +7,7 @@ defmodule Sentinel do
       if Application.get_env(:sentinel, :confirmable) != :false do
         get     "/confirmation_instructions", Sentinel.Controllers.Html.User, :confirmation_instructions
         post    "/users/confirm",         Sentinel.Controllers.Html.User, :confirm
+        get    "/users/confirm",         Sentinel.Controllers.Html.User, :confirm
       end
       get     "/sessions",              Sentinel.Controllers.Html.Sessions, :new
       post    "/sessions",              Sentinel.Controllers.Html.Sessions, :create
