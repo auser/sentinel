@@ -1,4 +1,6 @@
 defmodule Sentinel.UserRegistration do
+  import Logger
+
   alias Sentinel.Registrator
   alias Sentinel.Confirmator
   alias Sentinel.Mailer
@@ -13,6 +15,8 @@ defmodule Sentinel.UserRegistration do
     {confirmation_token, changeset} =
       Registrator.changeset(user_params)
       |> Confirmator.confirmation_needed_changeset
+
+    Logger.debug "Confirmation token is: #{confirmation_token}"
 
     case Util.repo.insert(changeset) do
       {:ok, user} -> confirmable_and_invitable(user, confirmation_token)
