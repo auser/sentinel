@@ -24,16 +24,20 @@ defmodule Html.SessionControllerTest do
   end
 
   test "sign in with unknown email" do
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: @email}})
     assert conn.status == 401
+    assert String.contains?(conn.resp_body, ~s(Oops, something went wrong with your email or password!))
+    assert String.contains?(conn.resp_body, ~s(Unknown email or password))
   end
 
   test "sign in with wrong password" do
     Registrator.changeset(%{email: @email, password: @password})
     |> repo.insert!
 
-    conn = call(TestRouter, :post, "/sessions", %{password: "wrong", email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: "wrong", email: @email}})
     assert conn.status == 401
+    assert String.contains?(conn.resp_body, ~s(Oops, something went wrong with your email or password!))
+    assert String.contains?(conn.resp_body, ~s(Unknown email or password))
   end
 
   test "sign in as unconfirmed user - confirmable default/optional" do
@@ -43,7 +47,7 @@ defmodule Html.SessionControllerTest do
                       |> Confirmator.confirmation_needed_changeset
     repo.insert!(changeset)
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: @email}})
     assert conn.status == 302
   end
 
@@ -54,7 +58,7 @@ defmodule Html.SessionControllerTest do
                       |> Confirmator.confirmation_needed_changeset
     repo.insert!(changeset)
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: @email}})
     assert conn.status == 302
   end
 
@@ -65,8 +69,10 @@ defmodule Html.SessionControllerTest do
                       |> Confirmator.confirmation_needed_changeset
     repo.insert!(changeset)
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: @email}})
     assert conn.status == 401
+    assert String.contains?(conn.resp_body, ~s(Oops, something went wrong with your email or password!))
+    assert String.contains?(conn.resp_body, ~s(Account not confirmed yet. Please follow the instructions we sent you by email.))
   end
 
   test "sign in as confirmed user with email" do
@@ -74,7 +80,7 @@ defmodule Html.SessionControllerTest do
                                       |> Ecto.Changeset.put_change(:confirmed_at, Ecto.DateTime.utc)
                                       |> repo.insert!
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: @email})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: @email}})
     assert conn.status == 302
   end
 
@@ -83,28 +89,32 @@ defmodule Html.SessionControllerTest do
                                       |> Ecto.Changeset.put_change(:confirmed_at, Ecto.DateTime.utc)
                                       |> repo.insert!
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, email: String.upcase(@odd_case_email)})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, email: String.upcase(@odd_case_email)}})
     assert conn.status == 302
   end
 
   test "sign in with unknown username" do
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, username: @username})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, username: @username}})
     assert conn.status == 401
+    assert String.contains?(conn.resp_body, ~s(Oops, something went wrong with your email or password!))
+    assert String.contains?(conn.resp_body, ~s(Unknown username or password))
   end
 
   test "sign in with username and wrong password" do
     Registrator.changeset(%{"username" => @username, "password" => @password, "role" => @role})
                                         |> repo.insert!
 
-    conn = call(TestRouter, :post, "/sessions", %{password: "wrong", username: @username})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: "wrong", username: @username}})
     assert conn.status == 401
+    assert String.contains?(conn.resp_body, ~s(Oops, something went wrong with your email or password!))
+    assert String.contains?(conn.resp_body, ~s(Unknown username or password))
   end
 
   test "sign in user with username" do
     Registrator.changeset(%{"username" => @username, "password" => @password, "role" => @role})
                                         |> repo.insert!
 
-    conn = call(TestRouter, :post, "/sessions", %{password: @password, username: @username})
+    conn = call(TestRouter, :post, "/sessions", %{session: %{password: @password, username: @username}})
     assert conn.status == 302
   end
 

@@ -4,17 +4,26 @@
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <p>Oops, something went wrong with your email or password!</p>
+      <%= if error = @changeset.errors[:base] do %>
+        <%= content_tag :span, elem(error, 0), class: "sentinel help-block" %>
+      <% end %>
     </div>
   <% end %>
 
   <div class="sentinel form-group">
     <%= label f, :email, class: "sentinel control-label" %>
     <%= email_input f, :email, class: "sentinel form-control" %>
+    <% if error = @changeset.errors[:email] do %>
+      <%= content_tag :span, elem(error, 0), class: "sentinel help-block" %>
+    <% end %>
   </div>
 
   <div class="sentinel form-group">
     <%= label f, :password, class: "sentinel control-label" %>
     <%= password_input f, :password, class: "sentinel form-control" %>
+    <% if error = @changeset.errors[:password] do %>
+      <%= content_tag :span, elem(error, 0), class: "sentinel help-block" %>
+    <% end %>
   </div>
 
   <div class="sentinel actions form-group">

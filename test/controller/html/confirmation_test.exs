@@ -37,7 +37,7 @@ defmodule Html.ConfirmationTest do
     user = Sentinel.Util.repo.insert!(changeset)
 
     conn = call(Sentinel.TestRouter, :post, "/users/confirm", %{email: user.email, confirmation_token: "bad_token"})
-    assert conn.status == 422
+    assert conn.status == 302
   end
 
   test "confirm a user" do
@@ -46,7 +46,7 @@ defmodule Html.ConfirmationTest do
     user = Sentinel.Util.repo.insert!(changeset)
 
     conn = call(Sentinel.TestRouter, :post, "/users/confirm", %{email: user.email, confirmation_token: token})
-    assert conn.status == 200
+    assert conn.status == 302
 
     updated_user = Sentinel.Util.repo.get! Sentinel.UserHelper.model, user.id
 
@@ -66,7 +66,7 @@ defmodule Html.ConfirmationTest do
     new_email_user = Sentinel.TestRepo.update!(changeset)
 
     conn = call(Sentinel.TestRouter, :post, "/users/confirm", %{email: new_email_user.email, confirmation_token: token})
-    assert conn.status == 200
+    assert conn.status == 302
 
     updated_user = Sentinel.Util.repo.get! Sentinel.UserHelper.model, user.id
     assert updated_user.hashed_confirmation_token == nil

@@ -8,7 +8,7 @@ defmodule Sentinel.Session do
     field :password, :string
   end
 
-  @required_fields ~w(password)
+  @required_fields ~w(password)a
   @optional_fields ~w(username email)
 
   @doc """
@@ -20,6 +20,7 @@ defmodule Sentinel.Session do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, @required_fields ++ @optional_fields)
+    |> validate_required(@required_fields)
     |> Sentinel.Session.username_or_email_required
   end
 
