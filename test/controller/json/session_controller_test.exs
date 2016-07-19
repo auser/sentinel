@@ -97,7 +97,7 @@ defmodule Json.SessionControllerTest do
   test "sign in with unknown username" do
     conn = call(TestRouter, :post, "/api/sessions", %{password: @password, username: @username}, @headers)
     assert conn.status == 401
-    assert conn.resp_body == Poison.encode!(%{errors: [%{base: "Unknown email or password"}]})
+    assert conn.resp_body == Poison.encode!(%{errors: [%{base: "Unknown username or password"}]})
   end
 
   test "sign in with username and wrong password" do
@@ -106,7 +106,7 @@ defmodule Json.SessionControllerTest do
 
     conn = call(TestRouter, :post, "/api/sessions", %{password: "wrong", username: @username}, @headers)
     assert conn.status == 401
-    assert conn.resp_body == Poison.encode!(%{errors: [%{base: "Unknown email or password"}]})
+    assert conn.resp_body == Poison.encode!(%{errors: [%{base: "Unknown username or password"}]})
   end
 
   test "sign in user with username" do

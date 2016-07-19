@@ -12,31 +12,32 @@ defmodule Sentinel.Authenticator do
   def authenticate_by_email(email, password) do
     String.downcase(email)
     |> UserHelper.find_by_email
-    |> authenticate(password)
+    |> authenticate(password, "email")
   end
   def authenticate_by_username(username, password) do
     UserHelper.find_by_username(username)
-    |> authenticate(password)
+    |> authenticate(password, "username")
   end
 
-  def authenticate(user, password) do
+  @unknown_password_error_message "Unknown ~s or password"
+  def authenticate(user, password, identifier_name) do
     case check_password(user, password) do
       {:ok, %{confirmed_at: nil}} -> user |> confirmation_required?
       {:ok, _} -> {:ok, user}
-      error -> error
+      _ ->
+        {:error, %{base: to_string(:io_lib.format(@unknown_password_error_message, [identifier_name]))}}
     end
   end
 
-  @unknown_password_error_message "Unknown email or password"
   defp check_password(nil, _) do
     Util.crypto_provider.dummy_checkpw
-    {:error, %{base: @unknown_password_error_message}}
+    {:error}
   end
   defp check_password(user, password) do
     if Util.crypto_provider.checkpw(password, user.hashed_password) do
       {:ok, user}
     else
-      {:error, %{base: @unknown_password_error_message}}
+      {:error}
     end
   end
 

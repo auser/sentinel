@@ -18,18 +18,18 @@ defmodule Sentinel.Controllers.Html.Sessions do
   Log in as an existing user.
   Parameter are "username" and "password".
   """
-  def create(conn, %{"username" => username, "password" => password}) do
+  def create(conn, %{"session" => %{"username" => username, "password" => password}} = params) do
     case Authenticator.authenticate_by_username(username, password) do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(user)
         |> put_flash(:info, "Successfully logged in")
         |> redirect(to: "/")
-      {:error, _errors} ->
+      {:error, errors} ->
         conn
-        |> put_flash(:error, "Unable to authenticate successfully")
+        |> put_flash(:error, "Unable to perform authentication")
         |> put_status(:unauthorized)
-        |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
+        |> render(Sentinel.SessionView, "new.html", changeset: error_changeset(params, errors))
     end
   end
 
@@ -37,18 +37,18 @@ defmodule Sentinel.Controllers.Html.Sessions do
   Log in as an existing user.
   Parameter are "email" and "password".
   """
-  def create(conn, %{"email" => email, "password" => password}) do
+  def create(conn, %{"session" => %{"email" => email, "password" => password}} = params) do
     case Authenticator.authenticate_by_email(email, password) do
       {:ok, user} ->
         conn
         |> Guardian.Plug.sign_in(user)
         |> put_flash(:info, "Successfully logged in")
         |> redirect(to: "/")
-      {:error, _errors} ->
+      {:error, errors} ->
         conn
-        |> put_flash(:error, "Unable to authenticate successfully")
+        |> put_flash(:error, "Unable to perform authentication")
         |> put_status(:unauthorized)
-        |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
+        |> render(Sentinel.SessionView, "new.html", changeset: error_changeset(params, errors))
     end
   end
 
@@ -59,5 +59,13 @@ defmodule Sentinel.Controllers.Html.Sessions do
     Guardian.Plug.sign_out(conn)
     |> put_flash(:info, "Logged out successfully.")
     |> redirect(to: Sentinel.RouterHelper.helpers.sessions_path(conn, :new))
+  end
+
+  defp error_changeset(params, errors) do
+    changeset = Sentinel.Session.changeset(%Sentinel.Session{}, params["session"])
+    changeset = Enum.reduce(errors, changeset,  fn ({key, value}, changeset) ->
+      Ecto.Changeset.add_error(changeset, key, value)
+    end)
+    %{changeset | action: :create}
   end
 end
