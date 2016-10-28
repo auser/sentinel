@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title><%= Application.get_env(:sentinel, :app_name) %></title>
+    <title><%= Config.app_name %></title>
   </head>
 
   <body>

@@ -1,6 +1,6 @@
 <h2>Edit Account</h2>
 
-<%= form_for @changeset, Sentinel.RouterHelper.helpers.account_path(@conn, :update), fn f -> %>
+<%= form_for @changeset, Config.router_helper.account_path(@conn, :update), fn f -> %>
   <%= if @changeset.action do %>
     <div class="alert alert-danger">
       <ul>
@@ -18,7 +18,7 @@
     <%= email_input f, :email, class: "sentinel form-control" %>
   </div>
 
-  <% if  Application.get_env(:sentinel, :confirmable) != :false do %>
+  <% if Config.confirmable != :false do %>
     <div>Currently waiting confirmation for: <%= @user.unconfirmed_email %></div>
   <% end %>
 

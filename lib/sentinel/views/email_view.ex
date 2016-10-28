@@ -1,4 +1,6 @@
 defmodule Sentinel.EmailView do
-  use Phoenix.View, root: "lib/sentinel/templates/"
+  use Phoenix.View, root: "lib/sentinel/templates/email/", namespace: Bamboo.EmailView
   use Phoenix.HTML
+
+  alias Sentinel.Config
 end

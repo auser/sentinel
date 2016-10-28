@@ -1,9 +1,21 @@
 defmodule Sentinel.AuthHandler do
-  def unauthorized(conn, _) do
-    Sentinel.Util.send_error(conn, %{base: "Unknown email or password"}, 401)
+  @moduledoc """
+  Handles unauthorized & unauthenticated situations
+  """
+
+  alias Sentinel.Util
+
+  @doc """
+  Handles cases where the user fails to authenticate
+  """
+  def unauthenticated(conn, _) do
+    Util.send_error(conn, %{base: "Failed to authenticate"}, 401)
   end
 
-  def unauthenticated(conn, _) do
-    Sentinel.Util.send_error(conn, %{base: "Failed to authenticate"}, 401)
+  @doc """
+  Handles cases where the user fails authorization
+  """
+  def unauthorized(conn, _) do
+    Util.send_error(conn, %{base: "Unknown email or password"}, 401)
   end
 end

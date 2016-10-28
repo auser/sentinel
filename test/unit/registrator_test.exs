@@ -1,11 +1,7 @@
 defmodule RegistratorTest do
-  use Sentinel.TestCase
-
-  import Sentinel.Util
+  use Sentinel.UnitCase
 
   alias Sentinel.Registrator
-  alias Sentinel.TestRepo
-  alias Mix.Config
 
   setup do
     on_exit fn ->
@@ -29,7 +25,7 @@ defmodule RegistratorTest do
   end
 
   test "changeset validates presence of password when invitable is false" do
-    Config.persist([sentinel: [invitable: false]])
+    Mix.Config.persist([sentinel: [invitable: false]])
 
     changeset = Registrator.changeset(%{"email" => "user@example.com"})
     assert changeset.errors[:password] == {"can't be blank", []}
@@ -42,7 +38,7 @@ defmodule RegistratorTest do
   end
 
   test "changeset does not validates presence of password when invitable is true" do
-    Config.persist([sentinel: [invitable: true]])
+    Mix.Config.persist([sentinel: [invitable: true]])
 
     changeset = Registrator.changeset(%{"email" => "user@example.com"})
     assert Enum.empty?(changeset.errors)
@@ -55,7 +51,7 @@ defmodule RegistratorTest do
   end
 
   test "changeset validates uniqueness of email" do
-    user = Forge.saved_user
+    user = Factory.insert(:user)
     {:error, changeset} = Registrator.changeset(%{@valid_params | "email" => user.email})
                           |> TestRepo.insert
 
@@ -66,7 +62,7 @@ defmodule RegistratorTest do
     changeset = Registrator.changeset(@valid_params)
 
     hashed_pw = Ecto.Changeset.get_change(changeset, :hashed_password)
-    assert crypto_provider.checkpw(@valid_params["password"], hashed_pw)
+    assert Sentinel.Config.crypto_provider.checkpw(@valid_params["password"], hashed_pw)
   end
 
   test "changeset does not include the hashed password if invalid" do
@@ -104,7 +100,7 @@ defmodule RegistratorTest do
     assert changeset.valid?
   end
   test "changeset validates uniqueness of username" do
-    user = Forge.saved_user
+    user = Factory.insert(:user)
     {:error, changeset} = Registrator.changeset(%{@valid_username_params | "username" => user.username})
                           |> TestRepo.insert
 

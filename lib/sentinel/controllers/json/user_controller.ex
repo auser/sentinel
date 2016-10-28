@@ -1,5 +1,10 @@
-defmodule Sentinel.Controllers.Json.User do
+defmodule Sentinel.Controllers.Json.UserController do
+  @moduledoc """
+  Handles the user create, confirm and invite actions for JSON APIs
+  """
+
   use Phoenix.Controller
+  alias Sentinel.Config
   alias Sentinel.UserRegistration
   alias Sentinel.Util
 
@@ -19,7 +24,7 @@ defmodule Sentinel.Controllers.Json.User do
       {:ok, user} ->
         conn
         |> put_status(201)
-        |> render(Sentinel.ViewHelper.user_view, "show.json", %{user: user})
+        |> render(Config.user_view, "show.json", %{user: user})
       {:error, changeset} -> Util.send_error(conn, changeset.errors)
     end
   end
@@ -38,18 +43,23 @@ defmodule Sentinel.Controllers.Json.User do
       {:ok, user} ->
         conn
         |> put_status(200)
-        |> render(Sentinel.ViewHelper.user_view, "show.json", %{user: user})
+        |> render(Config.user_view, "show.json", %{user: user})
       {:error, changeset} -> Util.send_error(conn, changeset.errors)
     end
   end
 
+  @doc """
+  Creates a new user using the invitable flow, without a password. This sends
+  them an email which links to an endpoint where they can create a password
+  and fill in other account information
+  """
   def invited(conn, params) do
     case UserRegistration.invited(params) do
       {:ok, user} ->
         conn
         |> put_status(200)
-        |> render(Sentinel.ViewHelper.user_view, "show.json", %{user: user})
-      { :error, changeset} -> Util.send_error(conn, changeset.errors)
+        |> render(Config.user_view, "show.json", %{user: user})
+      {:error, changeset} -> Util.send_error(conn, changeset.errors)
     end
   end
 end
